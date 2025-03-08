@@ -29,7 +29,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Framework :: Streamlit",
     ],
     python_requires=">=3.7",
     install_requires=requirements,

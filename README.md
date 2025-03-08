@@ -1,3 +1,7 @@
+[![PyPI version](https://badge.fury.io/py/streamlit-html-sidebar.svg)](https://badge.fury.io/py/streamlit-html-sidebar)
+[![codecov](https://codecov.io/gh/javi-aranda/streamlit-html-sidebar/branch/master/graph/badge.svg)](https://codecov.io/gh/javi-aranda/streamlit-html-sidebar)
+
+
 # Streamlit HTML Sidebar
 
 A Streamlit component that allows you to create a customizable HTML sidebar that slides in from the right side of the screen.

@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
       - name: Run tests and collect coverage
-        run: pytest --cov=./ --cov-report=xml
+        run: pytest --cov=streamlit_html_sidebar --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:

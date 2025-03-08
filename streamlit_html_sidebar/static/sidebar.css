@@ -1,0 +1,28 @@
+.sidebar {
+    width: var(--sidebar-width); 
+    position: fixed; 
+    top: 0;
+    height: 100vh;
+    right: calc(-1 * var(--sidebar-width));
+    background-color: white;
+    color: black;
+    transition: right 0.3s ease-in-out;
+    padding-top: 60px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.sidebar.visible {
+    right: 0;
+    opacity: 1;
+    visibility: visible;
+}
+
+.close-btn {
+    position: absolute;
+    left: 20px;
+    font-size: 25px;
+    cursor: pointer;
+}

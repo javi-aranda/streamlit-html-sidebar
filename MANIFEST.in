@@ -1,0 +1,4 @@
+include LICENSE
+include README.md
+include requirements.txt
+recursive-include streamlit_html_sidebar/static * 

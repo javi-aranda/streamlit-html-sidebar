@@ -2,6 +2,8 @@
 
 A Streamlit component that allows you to create a customizable HTML sidebar that slides in from the right side of the screen.
 
+![Streamlit HTML Sidebar](https://github.com/javi-aranda/streamlit-html-sidebar/blob/master/examples/example.png?raw=true)
+
 ## Features
 
 - Create a sidebar with custom HTML content

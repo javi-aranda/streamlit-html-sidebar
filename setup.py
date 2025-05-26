@@ -10,7 +10,7 @@ with open("requirements.txt", encoding="utf-8") as f:
 
 setup(
     name="streamlit-html-sidebar",
-    version="0.1.0",
+    version="0.2.0",
     author="Javier Aranda",
     description="A Streamlit component that creates a customizable sidebar with HTML content",
     long_description=long_description,

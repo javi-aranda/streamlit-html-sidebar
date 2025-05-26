@@ -12,7 +12,7 @@ jobs:
     - name: pypi-github-sync
       uses: PabloLec/pypi-github-sync@v1.0.1
       with:
-          github_repo: javi-aranda/edx-analytics-logger
+          github_repo: javi-aranda/streamlit-html-sidebar
           twine_username: ${{ secrets.TWINE_USERNAME }}
           twine_password: ${{ secrets.TWINE_PASSWORD }}
           verify_metadata: true

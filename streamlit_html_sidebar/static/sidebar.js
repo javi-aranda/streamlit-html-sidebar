@@ -32,10 +32,10 @@ function initSidebar(sidebarId, width, content) {
     function createSidebar() {
         isClosing = false;
         
-        const existingSidebar = parentDoc.getElementById(sidebarId);
-        if (existingSidebar) {
-            existingSidebar.remove();
-        }
+        const existingSidebars = parentDoc.querySelectorAll('.sidebar');
+        existingSidebars.forEach(sidebar => {
+            sidebar.remove();
+        });
 
         const sidebar = parentDoc.createElement('div');
         sidebar.id = sidebarId;

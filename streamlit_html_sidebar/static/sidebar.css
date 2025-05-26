@@ -1,17 +1,18 @@
 .sidebar {
-    width: var(--sidebar-width); 
     position: fixed; 
     top: 0;
     height: 100vh;
-    right: calc(-1 * var(--sidebar-width));
-    background-color: white;
-    color: black;
-    transition: right 0.3s ease-in-out;
+    background-color: var(--sidebar-bg-color, white);
+    color: var(--sidebar-text-color, black);
+    transition: right 0.3s ease-in-out, background-color 0.3s ease;
     padding-top: 60px;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    box-shadow: -2px 0 5px var(--sidebar-shadow-color, rgba(0,0,0,0.2));
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .sidebar.visible {
@@ -25,4 +26,27 @@
     left: 20px;
     font-size: 25px;
     cursor: pointer;
+}
+
+.close-btn:hover {
+    opacity: 0.7;
+    background-color: var(--sidebar-close-btn-hover-bg, rgba(0,0,0,0.05));
+}
+
+/* Ensure sidebar content inherits theme colors */
+.sidebar h1, .sidebar h2, .sidebar h3, .sidebar h4, .sidebar h5, .sidebar h6 {
+    color: var(--sidebar-text-color, black);
+}
+
+.sidebar p {
+    color: var(--sidebar-text-color, black);
+}
+
+.sidebar a {
+    color: #ff4b4b; /* Streamlit's primary red color */
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    text-decoration: underline;
 }

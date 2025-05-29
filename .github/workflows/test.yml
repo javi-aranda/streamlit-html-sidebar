@@ -22,7 +22,7 @@ jobs:
         run: npm install --prefix streamlit_html_sidebar/static
       - name: Run JS tests
         run: npm test --prefix streamlit_html_sidebar/static
-      - name: Run tests and collect coverage
+      - name: Run Python tests and collect coverage
         run: pytest --cov=streamlit_html_sidebar --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

@@ -46,7 +46,8 @@ global.parent = {
 global.requestAnimationFrame = jest.fn(cb => cb());
 
 // Import the function to be tested after mocks are set up
-const { initSidebar, detectStreamlitTheme, createStyles, createSidebar, closeSidebar, adjustSidebarHeight } = require('./sidebar');
+const sidebarModule = require('./sidebar');
+const { initSidebar, detectStreamlitTheme, createStyles, createSidebar, closeSidebar, adjustSidebarHeight } = sidebarModule;
 
 describe('Sidebar Tests', () => {
   // Reset mocks before each test
@@ -69,16 +70,13 @@ describe('Sidebar Tests', () => {
     const content = '<p>Test Content</p>';
 
     test('should call createStyles and createSidebar', () => {
-      // To properly test initSidebar, we need to mock the functions it calls internally
-      // that are also part of the module. We can spy on them.
-      const sidebarModule = require('./sidebar');
-      const createStylesSpy = jest.spyOn(sidebarModule, 'createStyles');
-      const createSidebarSpy = jest.spyOn(sidebarModule, 'createSidebar');
+      const createStylesSpy = jest.spyOn(sidebarModule, 'createStyles').mockImplementation(() => {});
+      const createSidebarSpy = jest.spyOn(sidebarModule, 'createSidebar').mockImplementation(() => {});
       
       // Mock getElementById for createStyles and createSidebar internal calls
       global.parent.document.getElementById = jest.fn(id => {
-        if (id === 'dynamic-sidebar-styles') return null; // Simulate styles not existing yet
-        if (id === sidebarId) return null; // Simulate sidebar not existing yet
+        if (id === 'dynamic-sidebar-styles') return null;
+        if (id === sidebarId) return null;
         return {
           id,
           style: {},
@@ -89,19 +87,24 @@ describe('Sidebar Tests', () => {
         };
       });
       
-      sidebarModule.initSidebar(sidebarId, width, content);
+      initSidebar(sidebarId, width, content);
 
       expect(createStylesSpy).toHaveBeenCalledWith(global.parent.document, width);
       expect(createSidebarSpy).toHaveBeenCalledWith(global.parent.document, sidebarId, content, expect.any(Function));
 
-      // Clean up spies
       createStylesSpy.mockRestore();
       createSidebarSpy.mockRestore();
     });
 
     test('should add resize event listener to window.parent', () => {
+      // Mock the functions to prevent actual execution
+      jest.spyOn(sidebarModule, 'createStyles').mockImplementation(() => {});
+      jest.spyOn(sidebarModule, 'createSidebar').mockImplementation(() => {});
+      
       initSidebar(sidebarId, width, content);
       expect(global.parent.addEventListener).toHaveBeenCalledWith('resize', expect.any(Function));
+      
+      jest.restoreAllMocks();
     });
   });
 
@@ -218,6 +221,9 @@ describe('Sidebar Tests', () => {
     });
 
     test('should create sidebar element with correct properties', () => {
+      // Mock adjustSidebarHeight to prevent it from running
+      const adjustSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight').mockImplementation(() => {});
+      
       createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
 
       expect(global.parent.document.createElement).toHaveBeenCalledWith('div');
@@ -226,34 +232,42 @@ describe('Sidebar Tests', () => {
       expect(mockSidebarElement.innerHTML).toContain(content);
       expect(mockSidebarElement.innerHTML).toContain('<span class="close-btn">&#xD7;</span>');
       expect(global.parent.document.body.appendChild).toHaveBeenCalledWith(mockSidebarElement);
+      
+      adjustSpy.mockRestore();
     });
 
     test('should make sidebar visible using requestAnimationFrame', () => {
+      const adjustSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight').mockImplementation(() => {});
+      
       createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
       expect(global.requestAnimationFrame).toHaveBeenCalled();
       expect(mockSidebarElement.classList.add).toHaveBeenCalledWith('visible');
+      
+      adjustSpy.mockRestore();
     });
 
     test('should add event listener to close button', () => {
+      const adjustSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight').mockImplementation(() => {});
+      
       createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
       const closeBtnMock = mockSidebarElement.querySelector('.close-btn');
       expect(closeBtnMock.addEventListener).toHaveBeenCalledWith('click', mockCloseCallback);
+      
+      adjustSpy.mockRestore();
     });
 
     test('should call adjustSidebarHeight', () => {
-        // Spy on adjustSidebarHeight as it's part of the same module
-        const sidebarModule = require('./sidebar');
-        const adjustSidebarHeightSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight');
-        
-        createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
-        
-        expect(adjustSidebarHeightSpy).toHaveBeenCalled();
-        
-        // Clean up spy
-        adjustSidebarHeightSpy.mockRestore();
+      const adjustSidebarHeightSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight').mockImplementation(() => {});
+      
+      createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
+      
+      expect(adjustSidebarHeightSpy).toHaveBeenCalledWith(global.parent.document, sidebarId);
+      
+      adjustSidebarHeightSpy.mockRestore();
     });
 
     test('should remove existing sidebars before creating a new one', () => {
+      const adjustSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight').mockImplementation(() => {});
       const mockExistingSidebar = { remove: jest.fn() };
       global.parent.document.querySelectorAll = jest.fn(() => [mockExistingSidebar, mockExistingSidebar]);
       
@@ -261,6 +275,8 @@ describe('Sidebar Tests', () => {
       
       expect(global.parent.document.querySelectorAll).toHaveBeenCalledWith('.sidebar');
       expect(mockExistingSidebar.remove).toHaveBeenCalledTimes(2);
+      
+      adjustSpy.mockRestore();
     });
   });
 

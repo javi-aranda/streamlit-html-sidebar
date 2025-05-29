@@ -91,8 +91,8 @@ describe('Sidebar Tests', () => {
       
       sidebarModule.initSidebar(sidebarId, width, content);
 
-      expect(createStylesSpy).toHaveBeenCalled();
-      expect(createSidebarSpy).toHaveBeenCalled();
+      expect(createStylesSpy).toHaveBeenCalledWith(global.parent.document, width);
+      expect(createSidebarSpy).toHaveBeenCalledWith(global.parent.document, sidebarId, content, expect.any(Function));
 
       // Clean up spies
       createStylesSpy.mockRestore();
@@ -109,29 +109,29 @@ describe('Sidebar Tests', () => {
     test('should detect light theme correctly', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue({}); // Mock stApp existence
       global.parent.getComputedStyle = jest.fn().mockReturnValue({ backgroundColor: 'rgb(255, 255, 255)' });
-      expect(detectStreamlitTheme()).toBe('light');
+      expect(detectStreamlitTheme(global.parent.document)).toBe('light');
     });
 
     test('should detect dark theme correctly', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue({}); // Mock stApp existence
       global.parent.getComputedStyle = jest.fn().mockReturnValue({ backgroundColor: 'rgb(14, 17, 23)' }); // Dark theme color
-      expect(detectStreamlitTheme()).toBe('dark');
+      expect(detectStreamlitTheme(global.parent.document)).toBe('dark');
     });
 
     test('should fallback to light theme if stApp is not found', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue(null);
-      expect(detectStreamlitTheme()).toBe('light');
+      expect(detectStreamlitTheme(global.parent.document)).toBe('light');
     });
 
     test('should fallback to light theme if getComputedStyle fails', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue({});
       global.parent.getComputedStyle = jest.fn(() => { throw new Error('Style error'); });
-      expect(detectStreamlitTheme()).toBe('light');
+      expect(detectStreamlitTheme(global.parent.document)).toBe('light');
     });
      test('should fallback to light theme if background color is not in rgb format', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue({});
       global.parent.getComputedStyle = jest.fn().mockReturnValue({ backgroundColor: 'transparent' });
-      expect(detectStreamlitTheme()).toBe('light');
+      expect(detectStreamlitTheme(global.parent.document)).toBe('light');
     });
   });
 
@@ -141,7 +141,7 @@ describe('Sidebar Tests', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue({}); // Mock stApp
       global.parent.getComputedStyle = jest.fn().mockReturnValue({ backgroundColor: 'rgb(255, 255, 255)' }); // Light theme
 
-      createStyles('300px', '${CSS_PATH}'); // Assuming CSS_PATH is a placeholder
+      createStyles(global.parent.document, '300px');
 
       // Check for <style> tag creation
       expect(global.parent.document.createElement).toHaveBeenCalledWith('style');
@@ -168,7 +168,7 @@ describe('Sidebar Tests', () => {
       global.parent.document.querySelector = jest.fn().mockReturnValue({}); // Mock stApp
       global.parent.getComputedStyle = jest.fn().mockReturnValue({ backgroundColor: 'rgb(14, 17, 23)' }); // Dark theme
 
-      createStyles('250px', 'path/to/style.css');
+      createStyles(global.parent.document, '250px');
 
       expect(global.parent.document.head.appendChild).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -180,7 +180,7 @@ describe('Sidebar Tests', () => {
     test('should not create styles if style tag already exists', () => {
       global.parent.document.getElementById = jest.fn().mockReturnValue({}); // Styles exist
 
-      createStyles('300px', 'path/to/style.css');
+      createStyles(global.parent.document, '300px');
 
       expect(global.parent.document.createElement).not.toHaveBeenCalledWith('style');
       expect(global.parent.document.createElement).not.toHaveBeenCalledWith('link');
@@ -191,9 +191,10 @@ describe('Sidebar Tests', () => {
     const sidebarId = 'test-sidebar';
     const content = '<p>Test Content</p>';
     let mockSidebarElement;
+    let mockCloseCallback;
 
     beforeEach(() => {
-      // Reset mock for sidebar element before each test in this suite
+      mockCloseCallback = jest.fn();
       mockSidebarElement = {
         id: sidebarId,
         className: 'sidebar',
@@ -217,7 +218,7 @@ describe('Sidebar Tests', () => {
     });
 
     test('should create sidebar element with correct properties', () => {
-      createSidebar(sidebarId, content);
+      createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
 
       expect(global.parent.document.createElement).toHaveBeenCalledWith('div');
       expect(mockSidebarElement.id).toBe(sidebarId);
@@ -228,15 +229,15 @@ describe('Sidebar Tests', () => {
     });
 
     test('should make sidebar visible using requestAnimationFrame', () => {
-      createSidebar(sidebarId, content);
+      createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
       expect(global.requestAnimationFrame).toHaveBeenCalled();
       expect(mockSidebarElement.classList.add).toHaveBeenCalledWith('visible');
     });
 
     test('should add event listener to close button', () => {
-      createSidebar(sidebarId, content);
+      createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
       const closeBtnMock = mockSidebarElement.querySelector('.close-btn');
-      expect(closeBtnMock.addEventListener).toHaveBeenCalledWith('click', closeSidebar);
+      expect(closeBtnMock.addEventListener).toHaveBeenCalledWith('click', mockCloseCallback);
     });
 
     test('should call adjustSidebarHeight', () => {
@@ -244,7 +245,7 @@ describe('Sidebar Tests', () => {
         const sidebarModule = require('./sidebar');
         const adjustSidebarHeightSpy = jest.spyOn(sidebarModule, 'adjustSidebarHeight');
         
-        createSidebar(sidebarId, content);
+        createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
         
         expect(adjustSidebarHeightSpy).toHaveBeenCalled();
         
@@ -256,7 +257,7 @@ describe('Sidebar Tests', () => {
       const mockExistingSidebar = { remove: jest.fn() };
       global.parent.document.querySelectorAll = jest.fn(() => [mockExistingSidebar, mockExistingSidebar]);
       
-      createSidebar(sidebarId, content);
+      createSidebar(global.parent.document, sidebarId, content, mockCloseCallback);
       
       expect(global.parent.document.querySelectorAll).toHaveBeenCalledWith('.sidebar');
       expect(mockExistingSidebar.remove).toHaveBeenCalledTimes(2);
@@ -266,13 +267,14 @@ describe('Sidebar Tests', () => {
   describe('closeSidebar', () => {
     const sidebarId = 'test-sidebar';
     let mockSidebarElement;
+    let isClosingRef;
 
     beforeEach(() => {
+      isClosingRef = { value: false };
       mockSidebarElement = {
         id: sidebarId,
         classList: { remove: jest.fn() },
         addEventListener: jest.fn((event, cb) => {
-          // Immediately invoke callback for 'transitionend' for testing
           if (event === 'transitionend') {
             cb();
           }
@@ -283,97 +285,55 @@ describe('Sidebar Tests', () => {
     });
 
     test('should remove "visible" class and sidebar element after transition', () => {
-      closeSidebar(sidebarId);
+      closeSidebar(global.parent.document, sidebarId, isClosingRef);
 
       expect(global.parent.document.getElementById).toHaveBeenCalledWith(sidebarId);
       expect(mockSidebarElement.classList.remove).toHaveBeenCalledWith('visible');
       expect(mockSidebarElement.addEventListener).toHaveBeenCalledWith('transitionend', expect.any(Function), { once: true });
-      // Callback for transitionend should have been called, leading to remove()
       expect(mockSidebarElement.remove).toHaveBeenCalled();
+      expect(isClosingRef.value).toBe(false);
     });
 
     test('should not do anything if sidebar is not found', () => {
       global.parent.document.getElementById = jest.fn(() => null); // Sidebar not found
-      closeSidebar(sidebarId);
+      closeSidebar(global.parent.document, sidebarId, isClosingRef);
 
       expect(mockSidebarElement.classList.remove).not.toHaveBeenCalled();
       expect(mockSidebarElement.remove).not.toHaveBeenCalled();
     });
     
     test('should not run if already closing', () => {
-      // Call once to set isClosing to true internally (via the transitionend mock)
-      closeSidebar(sidebarId);
+      isClosingRef.value = true;
+      closeSidebar(global.parent.document, sidebarId, isClosingRef);
       
-      // Reset mocks for the actual test part
-      mockSidebarElement.classList.remove.mockClear();
-      mockSidebarElement.addEventListener.mockClear();
-      mockSidebarElement.remove.mockClear();
-      global.parent.document.getElementById.mockClear();
-
-      // At this point, isClosing should be true within the closeSidebar's closure scope
-      // from the previous call. However, this is hard to test directly without exposing isClosing.
-      // The current implementation of closeSidebar has a bug: isClosing is not shared across calls
-      // if initSidebar is not re-run. For this test, we assume a fresh context or that
-      // the isClosing flag is correctly managed by its surrounding scope (initSidebar).
-      // Given the current structure, a direct test for the isClosing flag's effect
-      // without calling initSidebar is tricky.
-      // This test will effectively test the "not found" path again if isClosing isn't working as expected
-      // across independent calls to closeSidebar.
-      // A better way would be to have isClosing as part of an object or returned/managed by initSidebar.
-
-      // Simulate isClosing being true by having getElementById return null
-      // This isn't a perfect test of the flag, but of the function's behavior
-      // if it were to try and close an already-in-process-of-closing sidebar.
-      // A more direct test would require refactoring sidebar.js.
-      
-      // To properly test the isClosing flag, we'd need to call closeSidebar twice quickly.
-      // The first call sets isClosing = true. The second call should then immediately return.
-      // However, our mock for addEventListener calls the callback immediately.
-      
-      const realSidebarModule = require('./sidebar');
-      // We need to re-initialize a sidebar to have a fresh `isClosing` variable in its scope.
-      // This is a limitation of testing module-scoped booleans like this.
-      // For this test, we'll assume `initSidebar` sets up the environment where `closeSidebar` operates.
-      
-      // Let's simulate the scenario where closeSidebar is called twice.
-      const localMockSidebarElement = {
-        id: 'local-test-sidebar',
-        classList: { remove: jest.fn() },
-        addEventListener: jest.fn(), // Don't auto-trigger transitionend here
-        remove: jest.fn(),
-      };
-      global.parent.document.getElementById = jest.fn(() => localMockSidebarElement);
-
-      // Call 1 - starts closing
-      realSidebarModule.closeSidebar('local-test-sidebar'); 
-      expect(localMockSidebarElement.classList.remove).toHaveBeenCalledTimes(1);
-      expect(localMockSidebarElement.addEventListener).toHaveBeenCalledTimes(1);
-      
-      // Call 2 - should do nothing because isClosing is true (within that scope)
-      realSidebarModule.closeSidebar('local-test-sidebar');
-      expect(localMockSidebarElement.classList.remove).toHaveBeenCalledTimes(1); // No new calls
-      expect(localMockSidebarElement.addEventListener).toHaveBeenCalledTimes(1); // No new calls
+      expect(global.parent.document.getElementById).not.toHaveBeenCalled();
     });
   });
 
   describe('adjustSidebarHeight', () => {
     const sidebarId = 'test-sidebar';
+    let mockSidebarElement;
 
-    test('should set sidebar height to window.parent.innerHeight', () => {
-      const mockSidebar = { style: {} };
-      global.parent.document.getElementById = jest.fn(() => mockSidebar);
-      global.parent.innerHeight = 800; // Example height
-
-      adjustSidebarHeight(sidebarId);
-
-      expect(global.parent.document.getElementById).toHaveBeenCalledWith(sidebarId);
-      expect(mockSidebar.style.height).toBe('800px');
+    beforeEach(() => {
+      mockSidebarElement = {
+        style: {},
+      };
+      global.parent.document.getElementById = jest.fn(() => mockSidebarElement);
     });
 
-    test('should not throw error if sidebar is not found', () => {
+    test('should set sidebar height to window height', () => {
+      adjustSidebarHeight(global.parent.document, sidebarId);
+      
+      expect(global.parent.document.getElementById).toHaveBeenCalledWith(sidebarId);
+      expect(mockSidebarElement.style.height).toBe('768px');
+    });
+
+    test('should not do anything if sidebar is not found', () => {
       global.parent.document.getElementById = jest.fn(() => null); // Sidebar not found
       
-      expect(() => adjustSidebarHeight(sidebarId)).not.toThrow();
+      adjustSidebarHeight(global.parent.document, sidebarId);
+      
+      expect(mockSidebarElement.style.height).toBeUndefined();
     });
   });
 });

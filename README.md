@@ -38,3 +38,20 @@ if st.button("Open Sidebar"):
     """
     create_sidebar(content, width="400px")
 ```
+
+## Running JavaScript Tests
+
+To run the JavaScript unit tests locally, you'll need Node.js and npm installed.
+
+1.  Navigate to the JavaScript code directory:
+    ```bash
+    cd streamlit_html_sidebar/static
+    ```
+2.  Install the necessary dependencies:
+    ```bash
+    npm install
+    ```
+3.  Run the tests:
+    ```bash
+    npm test
+    ```

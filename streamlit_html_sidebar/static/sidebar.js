@@ -113,4 +113,16 @@ function initSidebar(sidebarId, width, content) {
     createSidebar();
     
     window.parent.addEventListener('resize', adjustSidebarHeight);
-} 
+}
+
+// Export functions for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    initSidebar,
+    detectStreamlitTheme,
+    createStyles,
+    createSidebar,
+    closeSidebar,
+    adjustSidebarHeight
+  };
+}

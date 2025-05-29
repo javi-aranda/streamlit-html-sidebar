@@ -14,7 +14,15 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
           pip install -e .
-      - name: Run tests and collect coverage
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install JS dependencies
+        run: npm install --prefix streamlit_html_sidebar/static
+      - name: Run JS tests
+        run: npm test --prefix streamlit_html_sidebar/static
+      - name: Run Python tests and collect coverage
         run: pytest --cov=streamlit_html_sidebar --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
